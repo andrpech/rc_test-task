@@ -1,0 +1,38 @@
+.resize {
+  width: 50px;
+  height: auto;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  .stories {
+    width: 28%;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    padding: 15px;
+    color: #222;
+
+    .head {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .read {
+      display: flex;
+      margin-left: auto;
+      margin-right: auto;
+      text-decoration: none;
+      align-items: center;
+    }
+  }
+}
