@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { faker } from '@faker-js/faker';
 import { devConfig } from 'dev-config';
 import axios from 'axios';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CategoriesEntity } from './category.entity';
+import { Repository } from 'typeorm';
+import { NewsEntity } from './news.entity';
 
 export interface CategoryTypes {
   name: string;
@@ -20,10 +24,16 @@ export interface StoryTypes {
 
 @Injectable()
 export class NewsService {
+  constructor(
+    @InjectRepository(CategoriesEntity)
+    private readonly categoriesRepository: Repository<CategoriesEntity>,
+    @InjectRepository(NewsEntity)
+    private readonly newsRepository: Repository<NewsEntity>,
+  ) {}
+
   private _categoryList: CategoryTypes[] = [];
   private _imageNumber: number = 0;
   private _images: [] = [];
-  private _news: any = {};
 
   private async _generateCategoryList() {
     const categoriesList = [];
@@ -35,7 +45,8 @@ export class NewsService {
       categoriesList.push(category);
     });
     this._categoryList = categoriesList;
-    return categoriesList;
+    const categoriesEntities = this.categoriesRepository.create(categoriesList);
+    await this.categoriesRepository.insert(categoriesEntities);
   }
 
   private async _getImages(): Promise<void> {
@@ -83,14 +94,18 @@ export class NewsService {
       .slice(0, devConfig.SHORT_DESCRIPTION_WORDS_COUNT)
       .join(' ');
 
+    await this.newsRepository.insert(story);
     return story;
   }
 
+  // ----------------------------------------------------------------
+
   public async getCategoryList() {
-    return await this._generateCategoryList();
+    await this._generateCategoryList();
+    return this.categoriesRepository.find();
   }
 
-  public async generateNews(): Promise<void> {
+  public async generateNews(): Promise<any> {
     await this._getImages();
     const news: any = {};
 
@@ -104,13 +119,15 @@ export class NewsService {
         }),
       );
     });
+    setTimeout(() => news, 2000);
 
-    setTimeout(() => (this._news = news), 2000);
-
-    return this._news;
+    const newsEntities = this.newsRepository.create(news);
+    await this.newsRepository.insert(newsEntities);
+    return this.newsRepository.find();
   }
 
-  public async generateStory(): Promise<StoryTypes> {
-    return await this._generateStory('Random story');
+  public async generateStory(): Promise<any> {
+    await this._generateStory('Random story');
+    return this.newsRepository.findOne({ where: { category: 'Random story' } });
   }
 }

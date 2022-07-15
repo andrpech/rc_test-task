@@ -1,18 +1,17 @@
 import { Controller, Get, HttpException, Param, Query } from '@nestjs/common';
 import { NewsService } from './news.service';
 
-const newsService = new NewsService();
-
 @Controller('news')
 export class NewsController {
+  constructor(private readonly newsService: NewsService) {}
   @Get()
   async getCategoryList() {
-    return await newsService.getCategoryList();
+    return await this.newsService.getCategoryList();
   }
 
   @Get('/random')
   async getOneRandomStory() {
-    return await newsService.generateStory();
+    return await this.newsService.generateStory();
   }
 
   @Get(':category')
@@ -36,7 +35,7 @@ export class NewsController {
     if (end >= 20) {
       end = 20;
     }
-    let news = await newsService.generateNews();
+    let news = await this.newsService.generateNews();
 
     if (news[category] === undefined) {
       throw new HttpException(
